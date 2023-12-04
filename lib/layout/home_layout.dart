@@ -1,9 +1,11 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app/modules/archived_tasks/archived_tasks_screen.dart';
 import 'package:todo_app/modules/done_tasks/done_tasks_screen.dart';
 import 'package:todo_app/modules/new_tasks/new_tasks_screen.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
+import 'package:todo_app/shared/components/constants.dart';
 
 class HomeLayout extends StatefulWidget {
   const HomeLayout({super.key});
@@ -23,7 +25,6 @@ class _HomeLayoutState extends State<HomeLayout> {
   var formKey = GlobalKey<FormState>();
 
   late Database database;
-  List<Map> databaseRecords = [];
 
   List<Widget> bodyScreens = [
     NewTasksScreen(),
@@ -189,7 +190,11 @@ class _HomeLayoutState extends State<HomeLayout> {
       appBar: AppBar(
         title: Text(appBarTitles[currentIndexValue]),
       ),
-      body: bodyScreens[currentIndexValue],
+      body: ConditionalBuilder(
+        condition: databaseRecords.length > 0,
+        builder: (context) => bodyScreens[currentIndexValue],
+        fallback: (context) => Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 
@@ -204,6 +209,9 @@ class _HomeLayoutState extends State<HomeLayout> {
               print('Error when creating table ${error.toString()}'));
     }, onOpen: (database) {
       print('database opened');
+      getDataFromDatabase(database).then((value) {
+        print(databaseRecords);
+      });
     });
   }
 
@@ -221,5 +229,11 @@ class _HomeLayoutState extends State<HomeLayout> {
         print('Error when Inserting New Record ${error.toString()}');
       });
     });
+  }
+
+  Future getDataFromDatabase(database) async {
+    databaseRecords = await database.rawQuery('SELECT * FROM tasks');
+
+    return databaseRecords;
   }
 }
