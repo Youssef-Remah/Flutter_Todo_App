@@ -17,7 +17,9 @@ class AppCubit extends Cubit<AppStates> {
 
   late Database database;
 
-  List<Map> databaseRecords = [];
+  List<Map> newTasks = [];
+  List<Map> doneTasks = [];
+  List<Map> archivedTasks = [];
 
   List<Widget> bodyScreens = [
     NewTasksScreen(),
@@ -43,10 +45,7 @@ class AppCubit extends Cubit<AppStates> {
               print('Error when creating table ${error.toString()}'));
     }, onOpen: (database) {
       print('database opened');
-      getDataFromDatabase(database).then((value) {
-        databaseRecords = value;
-        emit(AppGetDatabaseState());
-      });
+      getDataFromDatabase(database);
     }).then((value) {
       database = value;
       emit(AppCreateDatabaseState());
@@ -65,20 +64,46 @@ class AppCubit extends Cubit<AppStates> {
         emit(AppInsertDatabaseState());
         print('${value.toString()} inserted successfully');
 
-        getDataFromDatabase(database).then((value) {
-          databaseRecords = value;
-          emit(AppGetDatabaseState());
-        });
+        getDataFromDatabase(database);
       }).catchError((error) {
         print('Error when Inserting New Record ${error.toString()}');
       });
     });
   }
 
-  Future getDataFromDatabase(database) async {
-    databaseRecords = await database.rawQuery('SELECT * FROM tasks');
+  void updateData({required String status, required int id}) {
+    database.rawUpdate('UPDATE tasks SET status = ? WHERE id = ?',
+        ['${status}', id]
+    ).then((value) {
+      getDataFromDatabase(database);
+      emit(AppUpdateDatabaseState());
+    });
+  }
 
-    return databaseRecords;
+  void getDataFromDatabase(database) {
+
+    database.rawQuery('SELECT * FROM tasks').then((value) {
+
+      newTasks = [];
+      doneTasks = [];
+      archivedTasks = [];
+
+      value.forEach(
+        (element)
+          {
+            if(element['status'] == 'done')
+              doneTasks.add(element);
+
+            else if(element['status'] == 'new')
+              newTasks.add(element);
+
+            else
+              archivedTasks.add(element);
+          }
+      );
+
+      emit(AppGetDatabaseState());
+    });
   }
 
   void changeBottomSheetState({required bool isShow}) {

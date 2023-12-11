@@ -18,9 +18,9 @@ class NewTasksScreen extends StatelessWidget {
       builder: (BuildContext context, AppStates state) {
         return ListView.separated(
           itemBuilder: (context, index) =>
-              buildTaskItem(cubit.databaseRecords[index]),
+              buildTaskItem(cubit.newTasks[index], context),
           separatorBuilder: (context, index) => Divider(thickness: 1.5),
-          itemCount: cubit.databaseRecords.length,
+          itemCount: cubit.newTasks.length,
         );
       },
     );
