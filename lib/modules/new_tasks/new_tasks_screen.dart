@@ -1,3 +1,4 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,12 +17,7 @@ class NewTasksScreen extends StatelessWidget {
     return BlocConsumer<AppCubit, AppStates>(
       listener: (BuildContext context, AppStates state) {},
       builder: (BuildContext context, AppStates state) {
-        return ListView.separated(
-          itemBuilder: (context, index) =>
-              buildTaskItem(cubit.newTasks[index], context),
-          separatorBuilder: (context, index) => Divider(thickness: 1.5),
-          itemCount: cubit.newTasks.length,
-        );
+        return buildTasksList(tasks: cubit.newTasks);
       },
     );
   }

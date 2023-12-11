@@ -1,3 +1,4 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app/shared/cubit/cubit.dart';
 
@@ -66,4 +67,33 @@ Widget buildTaskItem(Map taskModel, context) {
       ),
     ),
   );
+}
+
+Widget buildTasksList ({required List<Map> tasks}) {
+
+  return ConditionalBuilder(
+    condition: tasks.length > 0,
+    builder: (BuildContext context) {
+      return ListView.separated(
+        itemBuilder: (context, index) =>
+            buildTaskItem(tasks[index], context),
+        separatorBuilder: (context, index) => Divider(thickness: 1.5),
+        itemCount: tasks.length,
+      );
+    },
+    fallback: (BuildContext context) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children:
+          [
+            Icon(Icons.menu,size: 100.0, color: Colors.grey,),
+            Text('No Tasks Yet, Please Add Some Tasks', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0, color: Colors.grey),),
+          ],
+        ),
+      );
+    },
+
+  );
+
 }
